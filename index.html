@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gatilho para música!</title>
+    
+    <!-- Tailwind CSS para a estrutura -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fontes do Google Fonts para o estilo Y2K/Colagem -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@400;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Estilos personalizados Y2K Dark Mode */
+        :root {
+            --bg-color: #0d0d0d;
+            --card-bg: #1a1a1a;
+            --accent-pink: #ff7eb9;
+            --accent-purple: #9333ea;
+            --accent-blue: #38bdf8;
+            --accent-yellow: #F9F871;
+            --text-color: #f0f0f0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: var(--text-color);
+            overflow-x: hidden;
+            padding-bottom: 4rem;
+        }
+
+        @keyframes glitch-move {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-3px, 3px); }
+            20% { transform: translate(4px, -2px); }
+            30% { transform: translate(-2px, 4px); }
+            40% { transform: translate(3px, -3px); }
+            50% { transform: translate(-4px, 2px); }
+            60% { transform: translate(2px, -4px); }
+            70% { transform: translate(-3px, 3px); }
+            80% { transform: translate(4px, -2px); }
+            90% { transform: translate(-2px, 4px); }
+        }
+
+        .main-title {
+            font-family: 'Londrina Solid', cursive;
+            font-weight: 900;
+            text-transform: uppercase;
+            position: relative;
+            color: var(--text-color);
+        }
+        
+        .main-title::before,
+        .main-title::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.9;
+        }
+
+        .main-title::before {
+            color: var(--accent-yellow);
+            animation: glitch-move 1s infinite;
+        }
+
+        .main-title::after {
+            color: var(--accent-purple);
+            animation: glitch-move 0.8s infinite reverse;
+        }
+        
+        .artist-card {
+            background-color: var(--card-bg);
+            border: 3px solid var(--accent-blue);
+            box-shadow: 5px 5px 0px var(--accent-purple);
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+            transform: rotate(var(--rotation, 0deg));
+        }
+
+        .artist-card-link:hover .artist-card {
+            transform: translateY(-10px) scale(1.08) rotate(0deg) !important;
+            box-shadow: 10px 10px 0px var(--accent-yellow);
+            z-index: 10;
+            position: relative;
+        }
+        
+        .filter-btn {
+            font-family: 'Londrina Solid', cursive;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            background-color: transparent;
+            color: var(--text-color);
+            border: 2px solid var(--accent-pink);
+            border-radius: 8px;
+            transition: all 0.2s ease-in-out;
+            position: relative;
+        }
+
+        .filter-btn .text {
+            position: relative;
+            z-index: 2;
+        }
+
+        .filter-btn::after {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            color: var(--accent-pink);
+            opacity: 0.8;
+            animation: glitch-move 1.5s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            background-color: var(--accent-pink);
+            color: #000;
+        }
+        
+        .filter-btn:hover::after, .filter-btn.active::after {
+            content: '';
+            animation: none;
+        }
+
+        .filter-btn.active {
+            background-color: var(--accent-pink);
+            color: #000;
+            box-shadow: none;
+            transform: translateY(2px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <!-- PÁGINA PRINCIPAL COM A GRADE DE ARTISTAS -->
+        <div id="main-grid-page">
+            <header class="text-center mb-8">
+                <h1 class="main-title text-5xl md:text-7xl tracking-tighter" data-text="Gatilho para música!">Gatilho para música!</h1>
+                <p class="text-lg text-gray-300 font-bold mt-2">Todos os shows que veremos neste ano</p>
+            </header>
+
+            <nav id="festival-filters" class="flex flex-wrap justify-center gap-3 mb-10">
+                <!-- Os botões de filtro serão inseridos aqui pelo JavaScript -->
+            </nav>
+
+            <main id="artist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8">
+                <!-- Os cards dos artistas serão inseridos aqui pelo JavaScript -->
+            </main>
+        </div>
+
+        <!-- PÁGINA DE DETALHES DO ARTISTA (inicialmente oculta) -->
+        <div id="artist-detail-page" class="hidden">
+            <button id="back-to-grid-btn" class="filter-btn px-4 py-2 mb-8">
+                <span class="text">&lt; Voltar</span>
+            </button>
+            <div class="flex flex-col md:flex-row gap-8">
+                <div id="detail-card-container" class="w-full md:w-1/3">
+                    <!-- O card grande do artista será inserido aqui -->
+                </div>
+                <div id="detail-text-container" class="w-full md:w-2/3">
+                    <h2 id="detail-artist-name" class="text-4xl font-bold font-['Londrina_Solid'] text-[var(--accent-yellow)]"></h2>
+                    <p id="detail-artist-festival" class="text-lg text-[var(--accent-blue)] mb-4"></p>
+                    <div id="detail-artist-notes" class="text-gray-300 whitespace-pre-wrap"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- INÍCIO DA ÁREA DE EDIÇÃO ---
+        const artistsData = [
+            // --- MADA ---
+            { name: "Marina Sena", festival: "MADA", imageUrl: "https://pbs.twimg.com/media/GzFoKmtWwAAJ_CU?format=jpg&name=large", details: "O que esperar do show da Marina Sena? Provavelmente hits como 'Por Supuesto' e músicas do álbum 'Vício Inerente'. A energia dela no palco é contagiante!" },
+            { name: "Liniker", festival: "MADA", imageUrl: "https://p2.trrsf.com/image/fget/cf/500/0/images.terra.com/2023/05/26/34502658-liniker-1706.jpg", details: "A voz da Liniker é um acontecimento! O show deve ser emocionante, com as músicas do 'Indigo Borboleta Anil'. Não perder por nada!" },
+            { name: "Boogarins", festival: "MADA", imageUrl: "https://yt3.googleusercontent.com/tZLn-ZVY06p_zN9_YJ-P4mL_sji5w_1Bis4d6I_nZaNamsqkFBVOjK6vviMlkrXQRkU5hHO-mes=s900-c-k-c0x00ffffff-no-rj", details: "Rock psicodélico goiano da melhor qualidade. O show deles é uma viagem sonora. Vamos ver se tocam as clássicas do 'Manual'." },
+            { name: "Rachel Reis", festival: "MADA", imageUrl: "https://i.scdn.co/image/ab67616d0000b2732ab386380f3b751b212e2b27", details: "A nova voz da Bahia! O show deve ser super dançante e cheio de brasilidade." },
+            { name: "Don L", festival: "MADA", imageUrl: "https://revistaogrito.com/wp-content/uploads/2018/02/donl.jpg", details: "Um dos maiores letristas do rap nacional. O show do Don L é sempre uma aula. Ansioso para ouvir as do 'Roteiro Pra Aïnouz'." },
+            { name: "Melly", festival: "MADA", imageUrl: "https://musicapave.com/wp-content/uploads/melly-despacha.jpg", details: "Revelação da nova MPB, a Melly tem uma voz doce e potente. O show deve ser mais intimista e lindo." },
+            { name: "Guto Brant", festival: "MADA", imageUrl: "https://www.tenhomaisdiscosqueamigos.com/wp-content/uploads/2022/10/Guto-Brant.jpg", details: "Vamos descobrir o som dele juntos!" },
+            { name: "Irmãs de Pau", festival: "MADA", imageUrl: "https://ffw.com.br/wp-content/uploads/2025/05/IRMAS_GC2_GUSTVOVIEIRA_03.png", details: "Promete ser um dos shows mais performáticos e impactantes do festival!" },
+            { name: "Febem", festival: "MADA", imageUrl: "https://pbs.twimg.com/media/E9Z3mxKWQAQgCzy.jpg", details: "Rap paulista pesado e com beats incríveis. O show deve ser pura energia." },
+            { name: "Jadsa", festival: "MADA", imageUrl: "https://musicainstantanea.com.br/wp-content/uploads/2025/03/Jadsa_-Alejandro-Tafur-Fernandez-700x476.jpeg", details: "A guitarra da Jadsa é única. O som dela mistura rock, pop e ritmos baianos." },
+            { name: "Afreekasia", festival: "MADA", imageUrl: "https://i.scdn.co/image/ab67616100005174890ed0c294bf9bf1fd552db9", details: "Vamos descobrir o som dele juntos!" },
+            { name: "Taj ma House", festival: "MADA", imageUrl: "https://www.festival-les-escales.com/wp-content/uploads/2025/03/TMH-1.png", details: "Vamos descobrir o som dele juntos!" },
+
+            // --- AFROPUNK Brasil ---
+            { name: "Coco Jones", festival: "AFROPUNK Brasil", imageUrl: "https://cdn-images.dzcdn.net/images/artist/aafb7db0601d7a7c6e223782abed093b/1900x1900-000000-81-0-0.jpg", details: "Estrela do R&B internacional, o show dela vai ser imperdível. Será que ela canta 'ICU'?" },
+            { name: "ÀTTØØXXÁ", festival: "AFROPUNK Brasil", imageUrl: "https://s2-g1.glbimg.com/Iq5ew3EAKC_hXAgIRd0wluLUSzw=/0x0:6027x4018/984x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_59edd422c0c84a879bd37670ae4f538a/internal_photos/bs/2021/K/P/UVr7eLQmWMNP0dIzXwTQ/attooxxa-rnca0006.jpg", details: "Pagodão baiano eletrônico pra não deixar ninguém parado. Preparados pra dançar muito?" },
+            { name: "BK’", festival: "AFROPUNK Brasil", imageUrl: "https://admin.cnnbrasil.com.br/wp-content/uploads/sites/12/2022/11/image1-e1668876561667.jpg?w=1200&h=1200&crop=1", details: "Um dos gigantes do rap do Rio. O show do BK' é sempre forte e com muita presença de palco." },
+            { name: "Boneka", festival: "AFROPUNK Brasil", imageUrl: "https://cdn.folhape.com.br/upload/dn_arquivo/2025/08/daniel-enquadramento-capa-2025-08-15t122846915.jpg", details: "Vamos descobrir o som dele juntos!" },
+            { name: "MC Luanna", festival: "AFROPUNK Brasil", imageUrl: "https://tonamidia.com.br/wp-content/uploads/2024/10/mcluanna-10out_tonamidia.jpg", details: "A 'mina mais chata do seu bairro' vai botar o festival pra ferver com o trap dela." },
+            { name: "Núbia (convida Muzenza)", festival: "AFROPUNK Brasil", imageUrl: "https://i0.wp.com/almapreta.com.br/images/2025/04/A-cantora-maranhense-Nubia.jpg?fit=1040%2C780&ssl=1", details: "Encontro de gerações da música baiana. Deve ser lindo!" },
+            { name: "Péricles", festival: "AFROPUNK Brasil", imageUrl: "https://santaportal.com.br/wp/wp-content/uploads/2023/02/Pericles.jpg", details: "O rei da voz! Péricles no Afropunk vai ser histórico. Já podemos preparar o gogó pra cantar junto." },
+            { name: "Tems", festival: "AFROPUNK Brasil", imageUrl: "https://images.squarespace-cdn.com/content/v1/5534a426e4b0ed810ce8f891/1612624805866-YI9XBLKU4HFG4Q5GP8UC/HEADER.jpg", details: "Atração internacional de peso! A voz da Tems é surreal. Um dos shows mais esperados do ano." },
+            { name: "BaianaSystem & Sister Nancy", festival: "AFROPUNK Brasil", imageUrl: "https://dicionariompb.com.br/wp-content/uploads/2021/04/Baiana-System.jpg", details: "Que encontro! A energia do Baiana com a lenda do dancehall Sister Nancy. Vai ser épico!" },
+            { name: "Budah", festival: "AFROPUNK Brasil", imageUrl: "https://yt3.googleusercontent.com/cRbEa7Foegb6eoIKdFjlBNu5iQ3gU5Vx-wa1UtzqT8Ic0JyACmvfnPxVW5oCD5_XEqg-5cGt9g=s900-c-k-c0x00ffffff-no-rj", details: "R&B nacional de alta qualidade. A Budah tem uma vibe muito boa." },
+            { name: "Liniker", festival: "AFROPUNK Brasil", imageUrl: "https://veja.abril.com.br/wp-content/uploads/2024/08/liniker.jpg?crop=1&resize=1212,909", details: "Liniker de novo! Sorte a nossa. Cada show é uma experiência única." },
+            { name: "Tatau (convida Márcia Short & Lazzo Matumbi)", festival: "AFROPUNK Brasil", imageUrl: "https://canaldovannucci.com.br/wp-content/uploads/2024/08/TATAU.jpg", details: "Ícones do axé music reunidos. Vai ser pura nostalgia e celebração." },
+            { name: "Os Garotin", festival: "AFROPUNK Brasil", imageUrl: "https://i.scdn.co/image/ab6761610000e5eb0830f992e98dedda7258dc44", details: "O pagode fofo deles vai ser um respiro no meio de tantos shows intensos." },
+            { name: "Umiranda", festival: "AFROPUNK Brasil", imageUrl: "https://cdn.jornaldebrasilia.com.br/wp-content/uploads/2025/04/10143533/afro_god_umiranda-620x620.jpg", details: "Vamos descobrir o som dele juntos!" },
+
+            // --- No Ar Coquetel Molotov ---
+            { name: "Don L", festival: "No Ar Coquetel Molotov", imageUrl: "https://www.cinejoia.com.br/qacinejoia/wp-content/uploads/2024/05/SITE-1.png", details: "Don L de novo! Ótimo pra gente comparar os shows e ver se muda o repertório." },
+            { name: "Urias", festival: "No Ar Coquetel Molotov", imageUrl: "https://pbs.twimg.com/media/GzPOzDqX0AAZXu4?format=jpg&name=large", details: "A Urias é uma performer completa. O show deve ter muita dança, moda e hinos pop." },
+            { name: "DJ Marky", festival: "No Ar Coquetel Molotov", imageUrl: "https://assets.beatportal.com/images/transforms/content-item/_1200x630_crop_center-center_none/DJ-Marky-Playlist-of-the-Week-1536x715-1718352151.jpg", details: "Lenda do drum 'n' bass mundial. Vai ser uma aula de música eletrônica." },
+            { name: "Duquesa", festival: "No Ar Coquetel Molotov", imageUrl: "https://homolog.plyn.com.br/africanize/wp-content/uploads/2024/12/duquesa-taurus-vol-2-africanize-scaled.jpg", details: "Trap baiano com muita atitude. A Duquesa tá vindo com tudo." },
+            { name: "Isabella Lovestory", festival: "No Ar Coquetel Molotov", imageUrl: "https://external-preview.redd.it/isabella-lovestory-announces-new-single-botoxxx-out-may-1st-v0-sf5sZlP-Qx8EbLyxhh2iZqNqlUSLMeXEhGllBCqQPQw.jpg?auto=webp&s=73e8693e6c4b8bdfd3d8a007116d294566c0f7d0", details: "Neoperreo pra todo mundo dançar! O show dela é pura festa." },
+            { name: "Zaho de Sagazan", festival: "No Ar Coquetel Molotov", imageUrl: "https://www.radiofrance.fr/s3/cruiser-production/2023/02/e663bc9b-6250-4fce-acbd-fd06131155cf/1200x680_sc_zaho-de-sagazan-13-credit-emma-picq.jpg", details: "Atração francesa que mistura pop e eletrônico. Vamos ver qual é a dela!" },
+            { name: "Samuel de Sabóia", festival: "No Ar Coquetel Molotov", imageUrl: "https://s2.glbimg.com/B7L70Hi9z7qpA5Tq8rC2YLG4TxA=/smart/e.glbimg.com/og/ed/f/original/2021/11/06/whatsapp_image_2021-10-27_at_18.33.27.jpeg", details: "Artista multimídia de Pernambuco. A apresentação deve ser bem conceitual e interessante." },
+        ];
+        // --- FIM DA ÁREA DE EDIÇÃO ---
+
+        const mainGridPage = document.getElementById('main-grid-page');
+        const artistDetailPage = document.getElementById('artist-detail-page');
+        const artistGrid = document.getElementById('artist-grid');
+        const festivalFilters = document.getElementById('festival-filters');
+        const backToGridBtn = document.getElementById('back-to-grid-btn');
+
+        const createArtistCard = (artist, isDetailView = false) => {
+            const imageSrc = artist.imageUrl || `https://placehold.co/400x400/1a1a1a/F9F871?text=${artist.name.replace(/ /g, '+')}`;
+            const cardClasses = isDetailView 
+                ? 'artist-card rounded-lg overflow-hidden group w-full' // Card maior na página de detalhe
+                : 'artist-card rounded-lg overflow-hidden group'; // Card normal na grade
+            
+            // ATUALIZADO: Define a altura da imagem com base na visualização para padronizar os cards
+            const imageHeightClass = isDetailView ? 'h-auto' : 'h-40';
+
+            return `
+                <div class="${cardClasses}" style="${isDetailView ? 'transform: none;' : ''}">
+                    <img src="${imageSrc}" alt="Foto de ${artist.name}" class="w-full ${imageHeightClass} object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x400/1a1a1a/f0f0f0?text=Erro';">
+                    <div class="p-3">
+                        <h3 class="font-bold text-lg truncate text-gray-100">${artist.name}</h3>
+                        <p class="text-sm text-sky-400 font-bold">${artist.festival}</p>
+                    </div>
+                </div>
+            `;
+        };
+
+        const displayArtists = (artists) => {
+            artistGrid.innerHTML = artists.map(artist => `
+                <div class="artist-card-link cursor-pointer" data-artist-name="${artist.name}">
+                    ${createArtistCard(artist)}
+                </div>
+            `).join('');
+            
+            const cards = document.querySelectorAll('.artist-card');
+            cards.forEach(card => {
+                const randomRotation = Math.random() * 8 - 4; 
+                card.style.setProperty('--rotation', `${randomRotation}deg`);
+            });
+        };
+
+        const showArtistDetail = (artistName) => {
+            const artist = artistsData.find(a => a.name === artistName);
+            if (!artist) return;
+
+            document.getElementById('detail-card-container').innerHTML = createArtistCard(artist, true);
+            document.getElementById('detail-artist-name').textContent = artist.name;
+            document.getElementById('detail-artist-festival').textContent = artist.festival;
+            document.getElementById('detail-artist-notes').textContent = artist.details;
+
+            mainGridPage.classList.add('hidden');
+            artistDetailPage.classList.remove('hidden');
+            window.scrollTo(0, 0);
+        };
+
+        const showMainGrid = () => {
+            artistDetailPage.classList.add('hidden');
+            mainGridPage.classList.remove('hidden');
+        };
+
+        const createFilterButtons = () => {
+            const festivals = ['Todos', ...new Set(artistsData.map(artist => artist.festival))];
+            
+            festivalFilters.innerHTML = festivals.map(festival => `
+                <button class="filter-btn px-4 py-2" data-text="${festival}" data-festival="${festival}">
+                    <span class="text">${festival}</span>
+                </button>
+            `).join('');
+            
+            festivalFilters.querySelector('.filter-btn').classList.add('active');
+        };
+
+        // Event Listeners
+        artistGrid.addEventListener('click', (e) => {
+            const cardLink = e.target.closest('.artist-card-link');
+            if (cardLink) {
+                const artistName = cardLink.dataset.artistName;
+                showArtistDetail(artistName);
+            }
+        });
+
+        backToGridBtn.addEventListener('click', showMainGrid);
+
+        festivalFilters.addEventListener('click', (e) => {
+            const button = e.target.closest('.filter-btn');
+            if (button) {
+                const selectedFestival = button.dataset.festival;
+                
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                const filteredArtists = (selectedFestival === 'Todos') 
+                    ? artistsData 
+                    : artistsData.filter(artist => artist.festival === selectedFestival);
+                
+                displayArtists(filteredArtists);
+            }
+        });
+
+        window.onload = () => {
+            createFilterButtons();
+            displayArtists(artistsData);
+        };
+    </script>
+
+</body>
+</html>
