@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gatilho para música!</title>
+
+        <!-- FAVICON -->
+    <link rel="icon" type="image/gif" href="Gatilho.gif">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Londrina+Solid:wght@400;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ESTILOS GERAIS */
+        :root {
+            --bg-color: #0d0d0d;
+            --card-bg: #1a1a1a;
+            --accent-pink: #ff7eb9;
+            --accent-purple: #9333ea;
+            --accent-blue: #38bdf8;
+            --accent-yellow: #F9F871;
+            --text-color: #f0f0f0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: url('https://www.transparenttextures.com/patterns/subtle-grunge.png'),
+                              linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: auto, 30px 30px;
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        .main-title {
+            font-family: 'Londrina Solid', cursive;
+            font-weight: 900; text-transform: uppercase; position: relative; color: var(--text-color);
+        }
+        
+        @keyframes glitch-move { 0%, 100% { transform: translate(0, 0); } 10% { transform: translate(-3px, 3px); } 20% { transform: translate(4px, -2px); } 30% { transform: translate(-2px, 4px); } 40% { transform: translate(3px, -3px); } 50% { transform: translate(-4px, 2px); } 60% { transform: translate(2px, -4px); } 70% { transform: translate(-3px, 3px); } 80% { transform: translate(4px, -2px); } 90% { transform: translate(-2px, 4px); } }
+        .main-title::before, .main-title::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.9; }
+        .main-title::before { color: var(--accent-yellow); animation: glitch-move 1s infinite; }
+        .main-title::after { color: var(--accent-purple); animation: glitch-move 0.8s infinite reverse; }
+        
+        .filter-btn { font-family: 'Londrina Solid', cursive; font-size: 1.1rem; text-transform: uppercase; background-color: transparent; color: var(--text-color); border: 2px solid var(--accent-pink); border-radius: 8px; transition: all 0.2s ease-in-out; position: relative; }
+        .filter-btn:hover { transform: translateY(-2px); background-color: var(--accent-pink); color: #000; }
+        .filter-btn.active { background-color: var(--accent-pink); color: #000; }
+
+        /* PÁGINA DE ARTISTAS */
+        .artist-card { background-color: var(--card-bg); border: 3px solid var(--accent-blue); box-shadow: 5px 5px 0px var(--accent-purple); transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; transform: rotate(var(--rotation, 0deg)); }
+        .artist-card-link:hover .artist-card { transform: translateY(-10px) scale(1.08) rotate(0deg) !important; box-shadow: 10px 10px 0px var(--accent-yellow); z-index: 10; position: relative; }
+        
+        /* PÁGINA DE HORÁRIOS */
+        .schedule-page { background-color: rgba(13, 13, 13, 0.4); backdrop-filter: blur(5px); position: relative; }
+        .schedule-grid { display: grid; grid-template-columns: 50px repeat(3, 1fr); grid-auto-rows: 25px; gap: 5px; }
+        .time-label { display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--accent-yellow); font-weight: bold; }
+        .stage-header { display: flex; align-items: center; justify-content: center; padding: 0.5rem; color: var(--bg-color); font-family: 'Anton', sans-serif; font-size: 1.2rem; text-align: center; font-weight: bold; }
+        .show-card { padding: 8px; overflow: hidden; position: relative; color: white; border-radius: 4px; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; }
+        .show-card:hover { transform: scale(1.02); z-index: 10; }
+        .attendees-container { position: absolute; bottom: 4px; right: 4px; display: flex; flex-direction: row-reverse; }
+        .attendee-bubble { width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; background-size: cover; background-position: center; box-shadow: 0 0 5px black; margin-left: -12px; }
+        .day-toggle-btn { font-family: 'Anton', sans-serif; font-size: 1.5rem; background-color: #333; color: #888; padding: 0.5rem 1.5rem; transition: all 0.2s ease; }
+        .day-toggle-btn.active { background-color: var(--accent-yellow); color: var(--bg-color); }
+        .time-separator { grid-column: 1 / -1; border-bottom: 1px solid rgba(255, 255, 255, 0.1); pointer-events: none; }
+
+        /* MODAL / POP-UP */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 40; display: flex; justify-content: center; align-items: center; }
+        .modal-content { background-color: var(--card-bg); border: 2px solid var(--accent-yellow); padding: 2rem; border-radius: 8px; max-width: 90%; width: 500px; position: relative; }
+        .modal-close-btn { position: absolute; top: -15px; right: -15px; background: var(--accent-yellow); color: var(--bg-color); border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer; border: 2px solid var(--bg-color); }
+
+        /* Estilo para o botão de música */
+        .music-toggle {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 3.5rem;
+            height: 3.5rem;
+            background-color: var(--accent-pink);
+            border: 3px solid var(--text-color);
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px var(--accent-purple);
+            transition: all 0.2s ease-in-out;
+            z-index: 100;
+        }
+        .music-toggle:hover {
+            transform: translateY(-2px) translateX(-2px);
+            box-shadow: 6px 6px 0px var(--accent-purple);
+        }
+        .music-toggle svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            fill: var(--text-color);
+        }
+
+    </style>
+</head>
+<body class="pb-16">
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-8">
+            <!-- Container flex para alinhar a logo e o título -->
+            <div class="flex justify-center items-center gap-4">
+                <h1 class="main-title text-5xl md:text-7xl tracking-tighter" data-text="Gatilho para música!">Gatilho para música!</h1>
+                <img src="Gatilho-logo.gif" alt="Logo Gatilho" class="h-16 md:h-20">
+            </div>
+            <p class="text-lg text-gray-300 font-bold mt-2">Nosso roteiro de shows para o MADA</p>
+        </header>
+        
+        <nav class="flex justify-center gap-4 mb-8">
+            <button id="view-artists-btn" class="filter-btn active px-6 py-2">Artistas</button>
+            <button id="view-schedule-btn" class="filter-btn px-6 py-2">Horários</button>
+        </nav>
+
+        <!-- PÁGINA PRINCIPAL (Artistas + Horários) -->
+        <div id="main-content">
+            <div id="artists-page">
+                <main id="artist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8">
+                    <!-- Cards dos artistas -->
+                </main>
+            </div>
+            <div id="schedule-page" class="hidden schedule-page p-4 rounded-lg">
+                <nav class="flex justify-center gap-1 my-4">
+                    <button id="day-friday-btn" class="day-toggle-btn">Sexta</button>
+                    <button id="day-saturday-btn" class="day-toggle-btn">Sábado</button>
+                </nav>
+                <div id="schedule-grid-container" class="schedule-grid">
+                    <!-- Agenda de horários -->
+                </div>
+            </div>
+        </div>
+
+        <!-- PÁGINA DE DETALHES DO ARTISTA (Oculta) -->
+        <div id="artist-detail-page" class="hidden">
+            <button id="back-to-grid-btn" class="filter-btn px-4 py-2 mb-8">&lt; Voltar</button>
+            <div class="flex flex-col md:flex-row gap-8">
+                <div id="detail-card-container" class="w-full md:w-1/3"></div>
+                <div class="w-full md:w-2/3">
+                    <h2 id="detail-artist-name" class="text-4xl font-bold font-['Londrina_Solid'] text-[var(--accent-yellow)]"></h2>
+                    <p id="detail-artist-notes" class="text-gray-300 whitespace-pre-wrap mt-4"></p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL DE HORÁRIOS (Oculto) -->
+    <div id="schedule-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button id="modal-close-btn" class="modal-close-btn">X</button>
+            <h2 id="modal-artist-name" class="text-3xl font-bold font-['Londrina_Solid'] text-white"></h2>
+            <p id="modal-show-time" class="text-lg text-gray-400 mb-4"></p>
+            <h3 class="font-bold text-xl text-yellow-300 mb-2">Confirmades:</h3>
+            <div id="modal-attendees-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-4">
+                <!-- Fotos dos amigos aqui -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Player de Música -->
+    <audio id="background-music" loop>
+        <source src="Tem Que Ter House - Taj Ma House.mp3" type="audio/mpeg">
+    </audio>
+    <button id="music-toggle-btn" class="music-toggle" aria-label="Tocar música">
+        <!-- Ícone de Play/Pause será inserido aqui pelo JavaScript -->
+    </button>
+
+
+    <script>
+        // ############### ÁREA DE EDIÇÃO PRINCIPAL ###############
+        const friends = [
+            { id: 'jv', name: 'João', imageUrl: 'joao.jpg' },
+            { id: 'aimmee', name: 'Aimmeé', imageUrl: 'aimmee.jpg' },
+            { id: 'bia', name: 'Bianca', imageUrl: 'bianca.jpg' },
+            { id: 'temis', name: 'Temis', imageUrl: 'temis.jpg' },
+            { id: 'lu', name: 'Luiza', imageUrl: 'luiza.jpg' },
+            { id: 'anthony', name: 'Anthony', imageUrl: 'anthony.jpg' },
+            { id: 'mths', name: 'Matheus', imageUrl: 'matheus.jpg' },
+            { id: 'nath', name: 'Nath', imageUrl: 'nath.jpg' },
+            { id: 'suzie', name: 'Suzie', imageUrl: 'suzie.jpg' },
+            { id: 'klebinho', name: 'Klebinho', imageUrl: 'klebinho.jpg' },
+            { id: 'theon', name: 'Theon', imageUrl: 'theon.jpg' },
+            { id: 'kelvin', name: 'Kelvin', imageUrl: 'kelvin.jpg' },
+            { id: 'amanda', name: 'Amanda', imageUrl: 'amanda.jpg' },
+            { id: 'vicente', name: 'Vicente', imageUrl: 'vicente.jpg' },
+            { id: 'wb', name: 'Walber', imageUrl: 'walber.jpg' },
+            { id: 'anthony', name: 'Anthony', imageUrl: 'anthony.jpg' },
+        ];
+        
+        // ATUALIZADO: Listas de presença preenchidas com base nas respostas.
+       const scheduleFriday = [
+            { id: 101, artist: "Dani Cruz", stage: 2, start: "19:40", end: "20:20", attendees: ['anthony'] },
+            { id: 102, artist: "Jadsa", stage: 3, start: "20:00", end: "21:00", attendees: ['anthony', 'bibi'] },
+            { id: 103, artist: "Melly", stage: 1, start: "20:30", end: "21:20", attendees: ['aimmee', 'lu', 'wb', 'nath', 'anthony', 'bibi', 'temis'] },
+            { id: 104, artist: "Tinoc", stage: 3, start: "21:15", end: "22:15", attendees: [] },
+            { id: 105, artist: "Boogarins", stage: 2, start: "21:30", end: "22:20", attendees: ['lu', 'anthony'] },
+            { id: 106, artist: "MC RB KBLZ (Convida Mika)", stage: 3, start: "22:30", end: "23:30", attendees: ['mths', 'kelvin', 'aimmee', 'lu', 'temis'] },
+            { id: 107, artist: "Marina Sena", stage: 1, start: "22:30", end: "23:30", attendees: ['theon', 'wb', 'mths', 'kelvin', 'aimmee', 'lu', 'nath', 'anthony', 'bibi', 'temis'] },
+            { id: 108, artist: "Afreekassia (DJ Set)", stage: 3, start: "23:30", end: "00:30", attendees: ['aimmee', 'bibi'] },
+            { id: 109, artist: "Dominguinho, João Gomes, Mestrinho e Jotapê", stage: 2, start: "23:40", end: "01:10", attendees: ['theon', 'lu', 'aimmee', 'wb', 'nath', 'anthony', 'bibi', 'temis'] },
+            { id: 110, artist: "Bateu Pode Comemorar", stage: 3, start: "00:30", end: "01:30", attendees: ['mths', 'kelvin'] },
+            { id: 111, artist: "Don L", stage: 1, start: "01:20", end: "02:20", attendees: ['theon', 'aimmee', 'nath', 'anthony', 'bibi', 'temis'] },
+            { id: 112, artist: "D.Silvestre", stage: 3, start: "01:30", end: "02:30", attendees: ['aimmee', 'bibi'] },
+            { id: 113, artist: "Febem", stage: 3, start: "02:45", end: "03:45", attendees: ['theon', 'aimmee', 'lu', 'bibi'] },
+            { id: 114, artist: "Kenya20hz", stage: 3, start: "04:00", end: "05:00", attendees: ['theon'] },
+            { id: 115, artist: "Jennify C (Convida Casixtranha)", stage: 3, start: "05:00", end: "06:00", attendees: ['theon'] },
+        ];
+        const scheduleSaturday = [
+            { id: 201, artist: "Guto Brant", stage: 2, start: "19:50", end: "20:30", attendees: [] },
+            { id: 202, artist: "O Cheiro do Queijo", stage: 3, start: "20:00", end: "21:00", attendees: ['theon'] },
+            { id: 203, artist: "Sourebel", stage: 1, start: "20:40", end: "21:20", attendees: ['aimmee', 'nath', 'anthony', 'bibi', 'temis'] },
+            { id: 204, artist: "Edgar", stage: 3, start: "21:15", end: "22:15", attendees: ['theon', 'anthony'] },
+            { id: 205, artist: "Potyguara Bardo", stage: 2, start: "21:30", end: "22:10", attendees: ['theon', 'temis'] },
+            { id: 206, artist: "Val Pescador", stage: 3, start: "22:15", end: "23:15", attendees: [] },
+            { id: 207, artist: "Rachel Reis", stage: 1, start: "22:20", end: "23:20", attendees: ['theon', 'aimmee', 'lu', 'wb', 'nath', 'kelvin', 'mths', 'anthony', 'bibi', 'temis'] },
+            { id: 208, artist: "Taj Ma House", stage: 3, start: "23:30", end: "00:30", attendees: ['mths', 'lu', 'wb', 'kelvin', 'anthony', 'temis'] },
+            { id: 209, artist: "BaianaSystem", stage: 2, start: "23:30", end: "00:50", attendees: ['theon', 'aimmee', 'nath', 'bibi', 'suzie', 'klebinho'] },
+            { id: 210, artist: "Seed Selector", stage: 3, start: "00:30", end: "01:30", attendees: [] },
+            { id: 211, artist: "Liniker", stage: 1, start: "01:10", end: "02:20", attendees: ['theon', 'mths', 'kelvin', 'aimmee', 'lu', 'wb', 'anthony', 'bibi', 'suzie', 'klebinho', 'temis'] },
+            { id: 212, artist: "Brisa", stage: 3, start: "01:30", end: "02:30", attendees: [] },
+            { id: 213, artist: "Mano Brown", stage: 1, start: "02:30", end: "03:30", attendees: ['aimmee', 'bibi', 'nath', 'suzie', 'klebinho'] },
+            { id: 214, artist: "Katy da Voz e as Abusadas", stage: 3, start: "02:45", end: "03:35", attendees: ['theon', 'mths', 'kelvin', 'wb', 'temis'] },
+            { id: 215, artist: "Irmãs de Pau", stage: 1, start: "03:50", end: "04:40", attendees: ['theon', 'mths', 'kelvin', 'lu', 'aimmee', 'wb', 'bibi', 'suzie', 'klebinho', 'temis'] },
+            { id: 216, artist: "Aya Ibeji", stage: 3, start: "04:40", end: "06:00", attendees: [] },
+        ];
+        const artistsData = [
+            { name: "Dominguinho, João Gomes, Mestrinho e Jotapê", imageUrl: "artistas/dominguinho.jpg", details: "Uma homenagem emocionante ao mestre Dominguinho, reunindo gigantes de diferentes gerações do forró. João Gomes, fenômeno do piseiro, se junta à sanfona virtuosa de Mestrinho e ao talento de Jotapê para celebrar um dos maiores legados da música brasileira. O que esperar do show no MADA? Uma noite de muita nostalgia, clássicos inesquecíveis e a energia contagiante do forró para dançar do começo ao fim." },
+            { name: "Mano Brown", imageUrl: "artistas/mano.jpg", details: "Um dos pilares do rap nacional e líder dos Racionais MC's, Mano Brown é uma voz fundamental na cultura brasileira há mais de 30 anos. Em sua carreira solo, explorou o soul e o funk no aclamado álbum 'Boogie Naipe'. Seus shows são eventos catárticos, carregados de crítica social e poesia urbana. O que esperar do show no MADA? Uma aula de história do hip-hop, com rimas afiadas e a presença de palco imponente de uma verdadeira lenda." },
+            { name: "Liniker", imageUrl: "artistas/liniker.jpg", details: "Dona de uma das vozes mais potentes e emocionantes da música brasileira contemporânea, Liniker se consolidou como uma artista essencial. Após o sucesso com os Caramelows, sua carreira solo decolou com o premiado álbum 'Indigo Borboleta Anil', vencedor do Grammy Latino. O que esperar do show no MADA? Uma performance arrebatadora, cheia de soul, jazz e MPB, onde cada música é entregue com uma intensidade que promete tocar a alma." },
+            { name: "Marina Sena", imageUrl: "artistas/marina.jpg", details: "Marina Sena surgiu como um furacão no pop nacional. Desde o sucesso estrondoso de 'De Primeira' (2021), com o hit 'Por Supuesto', ela se firmou como uma das maiores hitmakers do país. Seu trabalho mais recente, 'Vício Inerente' (2023), mergulha em sonoridades do trap e da música eletrônica. O que esperar do show no MADA? Muita dança, sensualidade e uma energia contagiante. Prepare-se para cantar todos os sucessos em coro com uma das performers mais magnéticas da atualidade." },
+            { name: "BaianaSystem", imageUrl: "artistas/baiana.jpg", details: "Mais do que uma banda, o BaianaSystem é um movimento. O coletivo soteropolitano é famoso por seus shows que são verdadeiros carnavais, misturando a guitarra baiana, sound system e ritmos afro-brasileiros. Suas apresentações são experiências imersivas e políticas, que convidam o público a dançar e refletir. O que esperar do show no MADA? Uma explosão sonora e visual. Um convite para pular, suar e sentir a força da música que pulsa direto da Bahia." },
+            { name: "Don L", imageUrl: "artistas/donl.jpg", details: "Vindo de Fortaleza, Don L é aclamado como um dos letristas mais brilhantes e complexos do rap brasileiro. Seus álbuns, como a saga 'Roteiro pra Aïnouz', são obras conceituais que narram histórias densas sobre a realidade do país. Sua sonoridade é cinematográfica e envolvente. O que esperar do show no MADA? Uma imersão profunda em suas narrativas, com rimas afiadas e uma atmosfera que prende a atenção. É um show para ouvir, sentir e pensar." },
+            { name: "Rachel Reis", imageUrl: "artistas/rachel.jpg", details: "Diretamente da Bahia, Rachel Reis conquistou o Brasil com seu som solar e dançante. Com o álbum de estreia 'Meu Esquema' (2022) e o hit 'Maresia', ela mostrou a força de sua mistura de pop, MPB e ritmos afro-diaspóricos. Sua música é leve, contagiante e cheia de brasilidade. O que esperar do show no MADA? Um show para cima, para dançar e se apaixonar. A vibe perfeita para curtir o clima do festival." },
+            { name: "Melly", imageUrl: "artistas/melly.jpg", details: "Uma das vozes mais promissoras da nova geração, Melly une R&B, jazz e MPB de forma sofisticada e autêntica. A cantora e compositora baiana ganhou destaque com o EP 'AZUL' e vem solidificando seu espaço com singles que mostram sua versatilidade e talento vocal. O que esperar do show no MADA? Um momento de pura musicalidade, com uma performance vocal impecável e um som que acalma e envolve. Perfeito para quem aprecia a boa música." },
+            { name: "Febem", imageUrl: "artistas/febem.jpg", details: "Integrante do coletivo Ceia Ent., Febem é um dos nomes mais fortes do rap paulista. Seu estilo é cru e direto, com flows marcantes sobre beats que flertam com o grime e o funk. Seu álbum 'Jovem OG' foi aclamado pela crítica e pelo público. O que esperar do show no MADA? Uma apresentação com a energia pulsante das ruas de São Paulo, cheia de atitude e com batidas pesadas que vão fazer o chão tremer." },
+            { name: "Irmãs de Pau", imageUrl: "artistas/irmas.jpg", details: "Formada por Isma Almeida e Vita Pereira, a dupla Irmãs de Pau é uma força da natureza. Elas misturam funk, música eletrônica e muita performance para criar um espetáculo que é ao mesmo tempo festa e manifesto. Suas letras afiadas abordam suas vivências como artistas negras e travestis. O que esperar do show no MADA? Um show inesquecível, performático, político e feito para dançar sem limites. É a atitude que o festival precisa." },
+            { name: "Jadsa", imageUrl: "artistas/jadsa.jpg", details: "Cantora, compositora e guitarrista de mão cheia, a baiana Jadsa traz em seu som uma fusão única de indie rock, MPB e a vanguarda paulistana. Seu álbum de estreia, 'Olho de Vidro', revela uma artista de personalidade, com arranjos surpreendentes e uma guitarra que é protagonista. O que esperar do show no MADA? Uma apresentação autêntica, com a força de sua guitarra e canções que fogem do óbvio. Ideal para quem gosta de ser surpreendido." },
+            { name: "Edgar", imageUrl: "artistas/edgar.jpg", details: "Edgar é um artista multimídia que usa o rap como ferramenta para criar universos distópicos e tecer críticas afiadas sobre a sociedade e a tecnologia. Com uma estética cyberpunk e beats experimentais, como vistos no álbum 'Ultraleve', seu trabalho é denso e provocador. O que esperar do show no MADA? Uma performance que transcende a música, com um som industrial, letras velozes e um forte impacto visual. Uma experiência sonora e conceitual." },
+            { name: "Boogarins", imageUrl: "artistas/boogarins.jpg", details: "De Goiânia para o mundo, Boogarins é uma das bandas brasileiras de maior destaque internacional na cena do rock psicodélico. Com um som denso, guitarras viajantes e letras em português, eles criam atmosferas imersivas que hipnotizam o público. Seus shows são conhecidos pela entrega e pelos longos improvisos. O que esperar do show no MADA? Uma viagem sonora. Prepare-se para fechar os olhos e ser levado pelas ondas de som psicodélico da banda." },
+            { name: "Afreekassia (DJ Set)", imageUrl: "artistas/afreekassia.jpg", details: "A DJ e pesquisadora musical Afreekassia é conhecida por seus sets vibrantes que celebram a diversidade da música negra pelo mundo. Espere ouvir de tudo um pouco, desde raridades do afrobeat e do soul até as batidas mais quentes do funk e do R&B contemporâneo. O que esperar do show no MADA? Uma pista de dança sem fronteiras, com muita energia e a certeza de descobrir novos sons incríveis. É para dançar do começo ao fim." },
+            { name: "D.Silvestre", imageUrl: "artistas/dsilvestre.jpg", details: "Figura importante na cena eletrônica, D.Silvestre é um DJ e produtor que transita por diversas vertentes, do house ao techno, sempre com um toque brasileiro. Seus sets são construídos com técnica e bom gosto, criando a atmosfera perfeita para a pista. O que esperar do show no MADA? Uma seleção musical impecável para quem ama música eletrônica, com batidas que vão crescendo e envolvendo a todos." },
+            { name: "Katy da Voz e as Abusadas", imageUrl: "artistas/katy.jpg", details: "Diretamente de Natal, Katy da Voz e as Abusadas são a representação máxima da força do brega funk potiguar. Com um show feito para o público dançar, elas trazem a energia contagiante do ritmo que domina as periferias do Nordeste. O que esperar do show no MADA? Muita coreografia, batidas envolventes e a energia lá em cima. É o show perfeito para se jogar na dança sem medo." },
+            { name: "Potyguara Bardo", imageUrl: "artistas/potyguara.jpg", details: "Jogando em casa, a artista potiguar Potyguara Bardo é um fenômeno da música pop e da arte drag. Com o aclamado álbum 'Simulacre', ela consolidou seu nome na cena nacional com hits que misturam pop, eletrônico e ritmos regionais. Sua presença de palco é magnética. O que esperar do show no MADA? Uma mega produção, com balé, figurinos icônicos e todos os hits para cantar bem alto. Será um dos pontos altos do festival." },
+            { name: "Guto Brant", imageUrl: "artistas/guto.jpg", details: "O cantor e compositor mineiro Guto Brant traz um som que dialoga entre a MPB e o rock alternativo. Suas letras são poéticas e existenciais, musicadas por arranjos que criam uma atmosfera densa e introspectiva. O que esperar do show no MADA? Um momento de imersão e poesia. Um show para quem gosta de música com conteúdo e sentimento, para ouvir e refletir." },
+            { name: "Taj Ma House", imageUrl: "artistas/taj.jpg", details: "Taj Ma House é um projeto de música eletrônica que fusiona batidas do house com influências de diversas partes do mundo, criando uma sonoridade global e dançante. É um som feito para a pista, que conecta diferentes culturas através da música. O que esperar do show no MADA? Um set para dançar e viajar por diferentes paisagens sonoras, perfeito para curtir a madrugada do festival." },
+            { name: "Kenya20hz", imageUrl: "artistas/kenya.jpg", details: "DJ e produtora da cena de Belo Horizonte, Kenya20hz é conhecida por seus sets potentes que exploram o funk em suas mais variadas formas, do 150 BPM ao proibidão, mesclando com outras batidas da música eletrônica periférica. O que esperar do show no MADA? Uma pista de dança quente e sem descanso. Prepare-se para o grave batendo forte e muita energia." },
+            { name: "MC RB KBLZ (Convida Mika)", imageUrl: "artistas/rb.jpg", details: "Representante da cena do funk e do trap local, MC RB KBLZ se junta à cantora Mika para uma apresentação especial. A união promete misturar as rimas diretas do MC com a voz potente de Mika, criando uma nova sonoridade. O que esperar do show no MADA? A força da nova cena musical de Natal, com a energia do funk e a colaboração de dois talentos locais." },
+            { name: "Bateu Pode Comemorar", imageUrl: "artistas/bateu.jpg", details: "Um coletivo de percussão que leva a energia contagiante dos blocos de carnaval de rua para o palco. Com um repertório que vai de clássicos do axé a hits do pop, eles transformam qualquer lugar em uma grande festa. O que esperar do show no MADA? Uma celebração coletiva, com muito ritmo e a sensação de estar no meio da folia. Impossível ficar parado." },
+            { name: "Sourebel", imageUrl: "artistas/sourebel.jpg", details: "A banda traz em seu som as vibrações do reggae e do rock, com letras que falam sobre questões sociais, paz e resistência. É uma música com mensagem, para curtir e também para refletir. O que esperar do show no MADA? Uma apresentação com a energia positiva do reggae, para cantar junto e sentir a boa vibração da banda." },
+            { name: "Aya Ibeji", imageUrl: "artistas/aya.jpg", details: "Formada pelas gêmeas Emanuele e Jamilly, a dupla Aya Ibeji celebra a ancestralidade afro-brasileira através da música. Seus shows são percussivos, fortes e repletos de referências à cultura iorubá. É uma performance que conecta o público com suas raízes. O que esperar do show no MADA? Um espetáculo de força e representatividade, com tambores pulsantes e a beleza da herança africana no Brasil." },
+            { name: "Jennify C (Convida Casixtranha)", imageUrl: "artistas/jennify.jpg", details: "Artista da cena ballroom, Jennify C é uma DJ e produtora que traz para a pista a cultura do vogue e do house. Ao lado de Casixtranha, a performance promete ser uma celebração da diversidade, da liberdade dos corpos e da música eletrônica underground. O que esperar do show no MADA? Uma pista de dança fervida, com muito bate-cabelo, performances e as batidas contagiantes da cultura ballroom." },
+            { name: "O Cheiro do Queijo", imageUrl: "artistas/ocheiro.jpg", details: "Uma banda clássica da cena do rock potiguar, conhecida por seu som irreverente e suas letras bem-humoradas que retratam o cotidiano local. Eles misturam rock com diversos ritmos, criando uma sonoridade única e divertida. O que esperar do show no MADA? Um show para se divertir, cantar junto e celebrar uma das bandas mais queridas da história da música de Natal." },
+            { name: "Tinoc", imageUrl: "artistas/tinoc.jpg", details: "Representante da nova cena indie potiguar, Tinoc traz canções que falam sobre as angústias e belezas da vida urbana, com uma sonoridade que passeia pelo indie rock e pela nova MPB. O que esperar do show no MADA? Um som sincero e contemporâneo, perfeito para quem gosta de descobrir novos talentos da cena local." },
+            { name: "Val Pescador", imageUrl: "artistas/val.jpg", details: "Val Pescador é um artista que mantém viva a tradição do forró pé de serra. Com sua sanfona, ele traz o autêntico som do Nordeste, perfeito para dançar agarradinho e celebrar a cultura regional. O que esperar do show no MADA? Uma verdadeira aula de forró, com um repertório de clássicos e a alegria contagiante da sanfona." },
+            { name: "Brisa", imageUrl: "artistas/brisa.jpg", details: "Com um som que flerta com o R&B e o pop, a cantora Brisa é uma das novas vozes da música potiguar. Suas canções autorais exploram temas de amor e empoderamento com uma roupagem moderna. O que esperar do show no MADA? Uma apresentação para conhecer o talento da nova geração, com uma voz suave e um som cheio de groove." },
+            { name: "Dani Cruz", imageUrl: "artistas/dani.jpg", details: "Dani Cruz é uma cantora que celebra a riqueza da música brasileira, em especial o samba e a MPB. Com uma voz potente e um repertório de clássicos, ela comanda uma verdadeira roda de samba no palco. O que esperar do show no MADA? Uma grande celebração da música brasileira, para cantar junto, sambar e se emocionar com clássicos que todo mundo ama." },
+            { name: "Seed Selector", imageUrl: "artistas/seed.jpg", details: "Para os amantes do reggae e do dub, Seed Selector é a pedida certa. Com uma seleção de pedradas do gênero, o set é perfeito para relaxar, curtir a atmosfera do festival e deixar o som levar. O que esperar do show no MADA? Uma sessão de puro reggae music, com graves pesados e a vibe positiva que só o sound system pode proporcionar." },
+        ];
+        
+        // --- LÓGICA DA PÁGINA ---
+        const mainContent = document.getElementById('main-content');
+        const artistDetailPage = document.getElementById('artist-detail-page');
+        const artistsPage = document.getElementById('artists-page');
+        const schedulePage = document.getElementById('schedule-page');
+        const viewArtistsBtn = document.getElementById('view-artists-btn');
+        const viewScheduleBtn = document.getElementById('view-schedule-btn');
+        const dayFridayBtn = document.getElementById('day-friday-btn');
+        const daySaturdayBtn = document.getElementById('day-saturday-btn');
+        const artistGrid = document.getElementById('artist-grid');
+        const scheduleGridContainer = document.getElementById('schedule-grid-container');
+        const backToGridBtn = document.getElementById('back-to-grid-btn');
+        const scheduleModal = document.getElementById('schedule-modal');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        function displayArtists(artists) {
+            artistGrid.innerHTML = artists.map(artist => `
+                <div class="artist-card-link cursor-pointer" data-artist-name="${artist.name}">
+                    <div class="artist-card rounded-lg overflow-hidden group">
+                        <img src="${artist.imageUrl}" alt="Foto de ${artist.name}" class="w-full h-40 object-cover">
+                        <div class="p-3"><h3 class="font-bold text-lg truncate text-gray-100">${artist.name}</h3></div>
+                    </div>
+                </div>`).join('');
+        }
+
+        function createArtistDetailCard(artist) {
+            return `
+                <div class="artist-card rounded-lg overflow-hidden group w-full" style="transform: none;">
+                    <img src="${artist.imageUrl}" alt="Foto de ${artist.name}" class="w-full h-auto object-cover">
+                    <div class="p-3"><h3 class="font-bold text-lg text-gray-100">${artist.name}</h3></div>
+                </div>`;
+        }
+        
+        function timeToGridRow(timeStr) {
+            let [h, m] = timeStr.split(':').map(Number);
+            if (h < 19) h += 24;
+            return Math.floor(((h - 19) * 60 + m) / 30) * 2 + 2;
+        }
+
+        function renderSchedule(dayData) {
+            scheduleGridContainer.innerHTML = ''; 
+            const headers = `<div class="time-label"></div><div class="stage-header" style="background-color: var(--accent-pink);">Palco 1</div><div class="stage-header" style="background-color: var(--accent-purple);">Palco 2</div><div class="stage-header" style="background-color: var(--accent-blue);">Baile</div>`;
+            scheduleGridContainer.innerHTML += headers;
+            for (let i = 19; i <= 30; i++) {
+                const hour = i > 23 ? i - 24 : i;
+                const timeLabel = document.createElement('div');
+                timeLabel.classList.add('time-label');
+                timeLabel.textContent = `${String(hour).padStart(2, '0')}h`;
+                timeLabel.style.gridRow = timeToGridRow(`${i}:00`);
+                scheduleGridContainer.appendChild(timeLabel);
+                const separator = document.createElement('div');
+                separator.classList.add('time-separator');
+                separator.style.gridRow = timeToGridRow(`${i}:00`);
+                scheduleGridContainer.appendChild(separator);
+            }
+            dayData.forEach(show => {
+                const card = document.createElement('div');
+                card.classList.add('show-card');
+                card.dataset.showId = show.id;
+                const startRow = timeToGridRow(show.start);
+                const endRow = timeToGridRow(show.end);
+                card.style.gridColumn = show.stage + 1;
+                card.style.gridRow = `${startRow} / ${endRow}`;
+                const stageColors = ['var(--accent-pink)', 'var(--accent-purple)', 'var(--accent-blue)'];
+                card.style.backgroundColor = stageColors[show.stage - 1];
+                const attendeesHTML = show.attendees.map(friendId => {
+                    const friend = friends.find(f => f.id === friendId);
+                    if (!friend) return '';
+                    return `<div class="attendee-bubble" style="background-image: url('${friend.imageUrl}')" title="${friend.name}"></div>`;
+                }).join('');
+                card.innerHTML = `<div class="font-bold text-sm">${show.artist}</div><div class="text-xs text-black bg-white/20 inline-block px-1 rounded">${show.start}-${show.end}</div><div class="attendees-container">${attendeesHTML}</div>`;
+                scheduleGridContainer.appendChild(card);
+            });
+        }
+        
+        viewArtistsBtn.addEventListener('click', () => {
+            artistsPage.classList.remove('hidden');
+            schedulePage.classList.add('hidden');
+            viewArtistsBtn.classList.add('active');
+            viewScheduleBtn.classList.remove('active');
+        });
+
+        viewScheduleBtn.addEventListener('click', () => {
+            artistsPage.classList.add('hidden');
+            schedulePage.classList.remove('hidden');
+            viewArtistsBtn.classList.remove('active');
+            viewScheduleBtn.classList.add('active');
+            dayFridayBtn.classList.add('active');
+            daySaturdayBtn.classList.remove('active');
+            renderSchedule(scheduleFriday); 
+        });
+        
+        dayFridayBtn.addEventListener('click', () => {
+            dayFridayBtn.classList.add('active');
+            daySaturdayBtn.classList.remove('active');
+            renderSchedule(scheduleFriday);
+        });
+
+        daySaturdayBtn.addEventListener('click', () => {
+            dayFridayBtn.classList.remove('active');
+            daySaturdayBtn.classList.add('active');
+            renderSchedule(scheduleSaturday);
+        });
+
+        artistGrid.addEventListener('click', (e) => {
+            const cardLink = e.target.closest('.artist-card-link');
+            if (!cardLink) return;
+            const artistName = cardLink.dataset.artistName;
+            const artist = artistsData.find(a => a.name === artistName);
+            if (!artist) return;
+
+            document.getElementById('detail-card-container').innerHTML = createArtistDetailCard(artist);
+            document.getElementById('detail-artist-name').textContent = artist.name;
+            document.getElementById('detail-artist-notes').textContent = artist.details;
+            
+            mainContent.classList.add('hidden');
+            artistDetailPage.classList.remove('hidden');
+        });
+
+        backToGridBtn.addEventListener('click', () => {
+            mainContent.classList.remove('hidden');
+            artistDetailPage.classList.add('hidden');
+        });
+
+        scheduleGridContainer.addEventListener('click', (e) => {
+            const card = e.target.closest('.show-card');
+            if (!card) return;
+            
+            const showId = parseInt(card.dataset.showId);
+            const allShows = [...scheduleFriday, ...scheduleSaturday];
+            const show = allShows.find(s => s.id === showId);
+            if (!show) return;
+
+            document.getElementById('modal-artist-name').textContent = show.artist;
+            document.getElementById('modal-show-time').textContent = `${show.start} - ${show.end}`;
+            const attendeesGrid = document.getElementById('modal-attendees-grid');
+            attendeesGrid.innerHTML = '';
+            
+            if(show.attendees.length > 0) {
+                 show.attendees.forEach(friendId => {
+                    const friend = friends.find(f => f.id === friendId);
+                    if(friend) {
+                        attendeesGrid.innerHTML += `
+                            <div class="text-center">
+                                <img src="${friend.imageUrl}" class="w-20 h-20 rounded-full object-cover mx-auto border-2 border-yellow-300">
+                                <p class="mt-2 text-sm">${friend.name}</p>
+                            </div>`;
+                    }
+                });
+            } else {
+                attendeesGrid.innerHTML = `<p class="col-span-full text-center text-gray-400">Ninguém confirmado para este show ainda.</p>`;
+            }
+
+            scheduleModal.classList.remove('hidden');
+        });
+        
+        modalCloseBtn.addEventListener('click', () => scheduleModal.classList.add('hidden'));
+        scheduleModal.addEventListener('click', (e) => {
+            if (e.target === scheduleModal) {
+                 scheduleModal.classList.add('hidden');
+            }
+        });
+        
+        // --- LÓGICA DO PLAYER DE MÚSICA ---
+        const musicToggleBtn = document.getElementById('music-toggle-btn');
+        const backgroundMusic = document.getElementById('background-music');
+        const playIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+        const pauseIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+
+        if(musicToggleBtn && backgroundMusic) {
+            backgroundMusic.volume = 0.2;
+            musicToggleBtn.innerHTML = playIcon;
+
+            musicToggleBtn.addEventListener('click', () => {
+                if (backgroundMusic.paused) {
+                    backgroundMusic.play();
+                    musicToggleBtn.innerHTML = pauseIcon;
+                } else {
+                    backgroundMusic.pause();
+                    musicToggleBtn.innerHTML = playIcon;
+                }
+            });
+        }
+
+
+        window.onload = () => {
+            displayArtists(artistsData);
+        };
+    </script>
+</body>
+</html>
+
