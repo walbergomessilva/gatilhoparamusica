@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gatilho para música!</title>
 
-        <!-- FAVICON -->
+        <!-- FAVICON do gatinho em GIF -->
     <link rel="icon" type="image/gif" href="Gatilho.gif">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -51,11 +51,11 @@
         .filter-btn:hover { transform: translateY(-2px); background-color: var(--accent-pink); color: #000; }
         .filter-btn.active { background-color: var(--accent-pink); color: #000; }
 
-        /* PÁGINA DE ARTISTAS */
+        /* PÁGINA DOS ARTISTAS */
         .artist-card { background-color: var(--card-bg); border: 3px solid var(--accent-blue); box-shadow: 5px 5px 0px var(--accent-purple); transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; transform: rotate(var(--rotation, 0deg)); }
         .artist-card-link:hover .artist-card { transform: translateY(-10px) scale(1.08) rotate(0deg) !important; box-shadow: 10px 10px 0px var(--accent-yellow); z-index: 10; position: relative; }
         
-        /* PÁGINA DE HORÁRIOS */
+        /* PÁGINA DOS HORÁRIOS */
         .schedule-page { background-color: rgba(13, 13, 13, 0.4); backdrop-filter: blur(5px); position: relative; }
         .schedule-grid { display: grid; grid-template-columns: 50px repeat(3, 1fr); grid-auto-rows: 25px; gap: 5px; }
         .time-label { display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--accent-yellow); font-weight: bold; }
@@ -73,7 +73,7 @@
         .modal-content { background-color: var(--card-bg); border: 2px solid var(--accent-yellow); padding: 2rem; border-radius: 8px; max-width: 90%; width: 500px; position: relative; }
         .modal-close-btn { position: absolute; top: -15px; right: -15px; background: var(--accent-yellow); color: var(--bg-color); border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer; border: 2px solid var(--bg-color); }
 
-        /* Estilo para o botão de música */
+        /* Estilo para o botão de música (combinando com o tema principal da página) */
         .music-toggle {
             position: fixed;
             bottom: 1.5rem;
@@ -108,7 +108,7 @@
     <div class="container mx-auto p-4 md:p-8">
         
         <header class="text-center mb-8">
-            <!-- Container flex para alinhar a logo e o título -->
+            <!-- Container flex para alinhar a logo e o título (Tava dando erro colocar somente o título ai com o flex deu bom -->
             <div class="flex justify-center items-center gap-4">
                 <img src="Gatilho-logo.gif" alt="Logo Gatilho" class="h-16 md:h-20">
                 <h1 class="main-title text-5xl md:text-7xl tracking-tighter" data-text="Gatilho para música!">Gatilho para música!</h1>
@@ -139,7 +139,7 @@
             </div>
         </div>
 
-        <!-- PÁGINA DE DETALHES DO ARTISTA (Oculta) -->
+        <!-- PÁGINA DE DETALHES DO ARTISTA (Oculta, mostra só quando seleciona algum) -->
         <div id="artist-detail-page" class="hidden">
             <button id="back-to-grid-btn" class="filter-btn px-4 py-2 mb-8">&lt; Voltar</button>
             <div class="flex flex-col md:flex-row gap-8">
@@ -161,22 +161,22 @@
             <p id="modal-show-time" class="text-lg text-gray-400 mb-4"></p>
             <h3 class="font-bold text-xl text-yellow-300 mb-2">Confirmades:</h3>
             <div id="modal-attendees-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-4">
-                <!-- Fotos dos amigos aqui -->
+                <!-- Fotos do povo aqui -->
             </div>
         </div>
     </div>
 
-    <!-- Player de Música -->
+    <!-- Player de música -->
     <audio id="background-music" loop>
         <source src="Tem Que Ter House - Taj Ma House.mp3" type="audio/mpeg">
     </audio>
     <button id="music-toggle-btn" class="music-toggle" aria-label="Tocar música">
-        <!-- Ícone de Play/Pause será inserido aqui pelo JavaScript -->
+        <!-- Ícone de Play/Pause que vou colocar aqui com JavaScript -->
     </button>
 
 
     <script>
-        // ############### ÁREA DE EDIÇÃO PRINCIPAL ###############
+        // ############### ÁREA DE EDIÇÃO (Aq coloco os nomes dos amigos e dos artistas (futuramente seria legal criar um firebase pra cadastro ###############
         const friends = [
             { id: 'jv', name: 'João', imageUrl: 'joao.jpg' },
             { id: 'aimmee', name: 'Aimmeé', imageUrl: 'aimmee.jpg' },
@@ -456,4 +456,5 @@
     </script>
 </body>
 </html>
+
 
